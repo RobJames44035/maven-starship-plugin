@@ -19,8 +19,6 @@
 package org.starship;
 
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
@@ -28,26 +26,13 @@ import org.apache.maven.plugins.annotations.Mojo;
  */
 @Mojo(name = "help", requiresProject = false)
 public class HelpMojo extends AbstractMojo {
-
-    /**
-     * Executes the help Mojo, printing available goals and usage.
-     */
-    @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void execute() {
+        getLog().info("StarshipOS Plugin Help:");
+        getLog().info("  mvn starship:initialize    - Bootstrap StarshipOS project structure");
+        getLog().info("  mvn starship:add-module    - Add a new module to the project");
+        getLog().info("  mvn starship:build         - Build a specific StarshipOS component");
+        getLog().info("  mvn help:describe          - View plugin details (built-in)");
         getLog().info("");
-        getLog().info("Starship Maven Plugin - Help");
-        getLog().info("----------------------------------");
-        getLog().info("Available Goals:");
-        getLog().info("");
-        getLog().info("  starship:hello");
-        getLog().info("      Description: A sample goal to say hello.");
-        getLog().info("");
-        getLog().info("  starship:help");
-        getLog().info("      Description: Displays help information for the plugin.");
-        getLog().info("");
-        getLog().info("----------------------------------");
-        getLog().info("Usage:");
-        getLog().info("  mvn starship:<goal> [parameters]");
-        getLog().info("");
+        getLog().info("  Tip: Use -Darch=arm or -Darch=x86_64 for cross-arch support.");
     }
 }

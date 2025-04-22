@@ -7,7 +7,16 @@
       <w>gnueabihf</w>
       <w>helpmojo</w>
       <w>iommu</w>
+      <w>libasound</w>
+      <w>libcups</w>
+      <w>libfontconfig</w>
       <w>libncurses</w>
+      <w>libx</w>
+      <w>libxext</w>
+      <w>libxrandr</w>
+      <w>libxrender</w>
+      <w>libxt</w>
+      <w>libxtst</w>
       <w>noconfirm</w>
       <w>oldconfig</w>
       <w>olddefconfig</w>

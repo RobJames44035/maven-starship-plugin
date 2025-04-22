@@ -25,6 +25,12 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashSet;
 import java.util.Set;
 
+
+/**
+ * Utility class for building OpenJDK from source code.
+ * This class provides functionality to configure and build OpenJDK
+ * for different architectures within the StarshipOS project.
+ */
 public class BuildJDKUtil {
 
     private static final String JDK_SRC_DIR = "StarshipOS/openjdk";
@@ -33,11 +39,25 @@ public class BuildJDKUtil {
         // Constructor for future setup if needed
     }
 
+    /**
+     * Builds OpenJDK for the specified architecture by executing the configure
+     * and build steps sequentially.
+     *
+     * @param arch the target architecture (e.g., "arm" or "x86_64")
+     * @throws Exception if the configuration or build process fails
+     */
     public void buildJDK(String arch) throws Exception {
         configure(arch);
         build(arch);
     }
 
+    /**
+     * Configures the OpenJDK build environment for the specified architecture.
+     * Sets up the build directory and executes the configure script with appropriate options.
+     *
+     * @param architecture the target architecture (e.g., "arm" or "x86_64")
+     * @throws Exception if the configuration process fails or directory creation fails
+     */
     public void configure(String architecture) throws Exception {
         File jdkSrcDir = new File(System.getProperty("user.dir"), JDK_SRC_DIR);
         File buildDir = new File(jdkSrcDir, "build-" + architecture);
@@ -80,6 +100,13 @@ public class BuildJDKUtil {
         }
     }
 
+    /**
+     * Builds OpenJDK for the specified architecture using make.
+     * Executes the build process in the previously configured build directory.
+     *
+     * @param architecture the target architecture (e.g., "arm" or "x86_64")
+     * @throws Exception if the build process fails
+     */
     public void build(String architecture) throws Exception {
         File jdkSrcDir = new File(System.getProperty("user.dir"), JDK_SRC_DIR);
         File buildDir = new File(jdkSrcDir, "build-" + architecture);

@@ -38,12 +38,29 @@ import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+
+/**
+ * Maven plugin that creates a new module within a multi-module Maven project.
+ * This Mojo creates the module directory structure, generates a basic pom.xml file,
+ * and updates the parent pom.xml to include the new module.
+ */
 @Mojo(name = "add-module")
 public class AddModuleMojo extends AbstractMojo {
 
+    /**
+     * The name of the module to be created. This parameter is required and will be used
+     * as both the directory name and the artifactId in the generated pom.xml.
+     */
     @Parameter(property = "module", required = true)
     private String module;
 
+    /**
+     * Executes the plugin goal to create a new module.
+     * Creates the module directory structure, generates a pom.xml file with basic configuration,
+     * and updates the parent pom.xml to include the new module.
+     *
+     * @throws MojoExecutionException if any error occurs during module creation
+     */
     @Override
     public void execute() throws MojoExecutionException {
         try {

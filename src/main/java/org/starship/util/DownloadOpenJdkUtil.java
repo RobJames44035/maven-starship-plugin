@@ -20,10 +20,22 @@ package org.starship.util;
 
 import java.io.File;
 
+
+/**
+ * Utility class for downloading and cloning OpenJDK source code from the official repository.
+ * This class provides functionality to clone specific versions or the latest version of OpenJDK.
+ */
 public class DownloadOpenJdkUtil {
 
     private static final String GIT_URL = "https://github.com/openjdk/jdk.git";
 
+    /**
+     * Clones the OpenJDK repository to a local directory. If a tag is specified, performs a shallow clone
+     * of that specific version. Otherwise, performs a full clone of the master branch.
+     *
+     * @param tag The specific OpenJDK version tag to clone. If null or blank, clones the entire repository
+     * @throws Exception If the git clone operation fails or encounters any issues during execution
+     */
     public void cloneOpenJdk(String tag) throws Exception {
         File baseDir = new File(System.getProperty("user.dir"), "StarshipOS/openjdk");
 

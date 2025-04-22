@@ -25,13 +25,32 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+
+/**
+ * Utility class for building L4Re operating system components.
+ * Handles the build process including configuration setup and compilation
+ * for different architectures.
+ */
 public class BuildL4Util {
 
     private static final String L4_BASE_DIR = "StarshipOS/l4";
 
+    /**
+     * Constructs a new BuildL4Util instance.
+     *
+     * @param ignoredProject Maven project instance (currently not used)
+     */
     public BuildL4Util(MavenProject ignoredProject) {
     }
 
+    /**
+     * Builds L4Re for the specified architecture.
+     * This method handles the complete build process including directory validation,
+     * build setup, configuration copying, and final compilation.
+     *
+     * @param architecture the target architecture for the build
+     * @throws IllegalStateException if the build process fails
+     */
     public void buildL4(String architecture) {
         try {
             File l4Dir = getAbsolutePath();
@@ -48,6 +67,13 @@ public class BuildL4Util {
         }
     }
 
+    /**
+     * Executes the L4Re build process in the specified directory.
+     *
+     * @param baseDir      the base directory for the build
+     * @param architecture the target architecture
+     * @throws Exception if the build process fails
+     */
     private void buildL4Re(File baseDir, String architecture) throws Exception {
         ProcessBuilder builder = new ProcessBuilder("make")
                 .directory(baseDir)
@@ -61,6 +87,13 @@ public class BuildL4Util {
         }
     }
 
+    /**
+     * Copies the prebuilt configuration file for the specified architecture.
+     *
+     * @param objDir the target directory for the configuration file
+     * @param arch   the target architecture
+     * @throws IOException if the configuration file cannot be copied
+     */
     private void copyPrebuiltConfig(File objDir, String arch) throws IOException {
         String resourceName = "l4.config." + arch;
         try (InputStream in = getClass().getClassLoader().getResourceAsStream(resourceName)) {
@@ -74,16 +107,34 @@ public class BuildL4Util {
         }
     }
 
+    /**
+     * Gets the absolute path to the L4 base directory.
+     *
+     * @return the File object representing the L4 base directory
+     */
     private File getAbsolutePath() {
         return new File(System.getProperty("user.dir"), BuildL4Util.L4_BASE_DIR);
     }
 
+    /**
+     * Validates that the specified directory exists and is valid.
+     *
+     * @param dir the directory to validate
+     * @throws IOException if the directory doesn't exist or is invalid
+     */
     private void validateDirectory(File dir) throws IOException {
         if (!dir.exists() || !dir.isDirectory()) {
             throw new IOException("L4Re Base" + " directory does not exist or is invalid: " + dir.getAbsolutePath());
         }
     }
 
+    /**
+     * Sets up the build environment for the specified architecture.
+     *
+     * @param objDir       the build directory
+     * @param architecture the target architecture
+     * @throws Exception if the build setup fails
+     */
     private void setupBuild(File objDir, String architecture) throws Exception {
         ProcessBuilder builder = new ProcessBuilder("make", "B=target/" + architecture)
                 .directory(objDir)

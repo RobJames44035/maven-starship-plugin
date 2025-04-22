@@ -20,9 +20,20 @@ package org.starship.util;
 
 import java.io.File;
 
+
+/**
+ * Utility class for cleaning up Git metadata files and directories from a project.
+ * This includes removing .git directories and Git-specific files.
+ */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class CleanupUtil {
 
+    /**
+     * Recursively removes Git metadata from a directory and its subdirectories.
+     * This includes .git directories and Git-specific files.
+     *
+     * @param rootDir the root directory to start the cleanup process from
+     */
     public void scrubGitMetadata(File rootDir) {
         if (!rootDir.exists() || !rootDir.isDirectory()) return;
 
@@ -42,6 +53,12 @@ public class CleanupUtil {
         }
     }
 
+    /**
+     * Checks if a file is a Git metadata file.
+     *
+     * @param fileName the name of the file to check
+     * @return true if the file is a Git metadata file, false otherwise
+     */
     private boolean isGitMetadataFile(String fileName) {
         return fileName.equals(".gitignore") ||
                 fileName.equals(".gitattributes") ||
@@ -49,6 +66,11 @@ public class CleanupUtil {
                 fileName.equals(".gitkeep");
     }
 
+    /**
+     * Recursively deletes a file or directory and all its contents.
+     *
+     * @param file the file or directory to delete
+     */
     private void deleteRecursively(File file) {
         File[] contents = file.listFiles();
         if (contents != null) {
@@ -59,6 +81,10 @@ public class CleanupUtil {
         file.delete();
     }
 
+    /**
+     * Scrubs Git metadata from the StarshipOS directory in the current working directory.
+     * This method prepares the project for a clean Git initialization.
+     */
     public void scrubAndInit() {
         File root = new File(System.getProperty("user.dir"), "StarshipOS");
         scrubGitMetadata(root);

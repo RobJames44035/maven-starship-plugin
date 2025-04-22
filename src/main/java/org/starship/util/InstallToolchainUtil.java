@@ -26,14 +26,33 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 
+
+/**
+ * Utility class for installing required development toolchains and dependencies
+ * across different Linux distributions. Supports Debian, Fedora, RedHat and Arch
+ * based systems.
+ */
 public class InstallToolchainUtil {
 
     private final File projectDir;
 
+    /**
+     * Creates a new instance of InstallToolchainUtil.
+     *
+     * @param projectDir The root directory of the project where commands will be executed
+     */
     public InstallToolchainUtil(File projectDir) {
         this.projectDir = projectDir;
     }
 
+    /**
+     * Installs all required development toolchains and dependencies for the current
+     * operating system. Detects the OS flavor and executes appropriate installation
+     * commands.
+     *
+     * @throws IOException          If there are issues with file operations or command execution
+     * @throws InterruptedException If the installation process is interrupted
+     */
     public void installToolchain() throws IOException, InterruptedException {
         // 1. Detect operating system flavor
         String osFlavor = detectOSFlavor();
@@ -45,6 +64,13 @@ public class InstallToolchainUtil {
         installDependencies(osFlavor);
     }
 
+    /**
+     * Detects the Linux distribution flavor by reading /etc/os-release file.
+     *
+     * @return String identifying the OS flavor ("debian", "fedora", "redhat", "arch")
+     * or null if unsupported
+     * @throws IOException If the os-release file cannot be read
+     */
     private String detectOSFlavor() throws IOException {
         if (new File("/etc/os-release").exists()) {
             String osRelease = Files.readString(Path.of("/etc/os-release")).toLowerCase(Locale.ROOT);
@@ -61,6 +87,14 @@ public class InstallToolchainUtil {
         return null; // Unsupported OS
     }
 
+    /**
+     * Installs required development dependencies based on the detected OS flavor.
+     * Handles both universal and architecture-specific dependencies.
+     *
+     * @param osFlavor The detected operating system flavor
+     * @throws IOException          If there are issues with command execution or console access
+     * @throws InterruptedException If the installation process is interrupted
+     */
     private void installDependencies(String osFlavor) throws IOException, InterruptedException {
         // Define universal dependencies (always required)
         List<String> dependencies = List.of(
@@ -118,12 +152,25 @@ public class InstallToolchainUtil {
         executeCommand(installCommand);
     }
 
+    /**
+     * Checks if the current user has root privileges.
+     *
+     * @return true if current user is root, false otherwise
+     * @throws IOException If the user ID command execution fails
+     */
     private boolean isRootUser() throws IOException {
         ProcessBuilder builder = new ProcessBuilder("id", "-u");
         Process process = builder.start();
         return new String(process.getInputStream().readAllBytes()).trim().equals("0");
     }
 
+    /**
+     * Executes a shell command in the project directory.
+     *
+     * @param command The shell command to execute
+     * @throws IOException          If the command execution fails
+     * @throws InterruptedException If the command execution is interrupted
+     */
     private void executeCommand(String command) throws IOException, InterruptedException {
         ProcessBuilder builder = new ProcessBuilder("bash", "-c", command);
         builder.directory(projectDir);
@@ -137,6 +184,14 @@ public class InstallToolchainUtil {
     }
 
     // Utility helper to concatenate two lists
+
+    /**
+     * Concatenates two lists into a single list.
+     *
+     * @param list1 The first list to concatenate
+     * @param list2 The second list to concatenate
+     * @return A new list containing all elements from both input lists
+     */
     private List<String> concatLists(List<String> list1, List<String> list2) {
         List<String> fullList = new java.util.ArrayList<>(list1);
         fullList.addAll(list2);

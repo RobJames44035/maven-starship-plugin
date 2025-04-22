@@ -20,11 +20,25 @@ package org.starship.util;
 
 import java.io.File;
 
+
+/**
+ * Utility class for running Hello demo applications in QEMU emulator with Fiasco.OC microkernel
+ * and L4Re runtime environment. This class provides functionality to execute and test
+ * Hello configuration demos in a virtualized environment.
+ */
 public class RunHelloQemuUtil {
 
     private static final String BASE_FIASCO_DIR = "StarshipOS/fiasco";
     private static final String BASE_L4RE_DIR = "StarshipOS/l4";
 
+    /**
+     * Runs a Hello demo configuration in QEMU for the specified architecture.
+     * This method sets up the necessary kernel and L4Re directories, configures
+     * the module search path, and executes the demo in QEMU.
+     *
+     * @param arch the target architecture for running the demo (e.g., "x86", "arm")
+     * @throws Exception if the QEMU process fails to execute or returns a non-zero exit code
+     */
     public void runHelloDemo(String arch) throws Exception {
         File kernelObjDir = new File(System.getProperty("user.dir"), BASE_FIASCO_DIR + "/target/" + arch);
         File l4reSrcDir = new File(System.getProperty("user.dir"), BASE_L4RE_DIR);

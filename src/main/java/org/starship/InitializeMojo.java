@@ -26,25 +26,61 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.starship.ui.ModuleSelector;
 import org.starship.util.*;
 
 import java.io.File;
 import java.io.IOException;
 
-@SuppressWarnings("unused")
+
+/**
+ * Maven Mojo responsible for initializing the StarshipOS development environment.
+ * This plugin handles the complete setup process including:
+ * - Installing required toolchains for ARM and x86_64
+ * - Cloning necessary repositories
+ * - Building Fiasco and L4 kernels
+ * - Setting up OpenJDK
+ * - Creating Maven project structure
+ */
+@SuppressWarnings({"unused", "ConstantValue"})
 @Mojo(name = "initialize", requiresProject = false)
 public class InitializeMojo extends AbstractMojo {
+    /**
+     * Base directory for the StarshipOS project
+     */
     private static final File baseDir = new File(System.getProperty("user.dir"), "StarshipOS");
+    /**
+     * Fixed project name
+     */
     private static final String LOCKED_PROJECT_NAME = "StarshipOS";
+    /**
+     * User's home directory
+     */
     @Parameter(defaultValue = "${user.home}", readonly = true)
     private File homeDirectory;
+    /**
+     * Current Maven project
+     */
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
+    /**
+     * Current Maven session
+     */
     @Parameter(defaultValue = "${session}", readonly = true, required = true)
     private MavenSession session;
+    /**
+     * Plugin manager for build operations
+     */
     @Component
     private BuildPluginManager pluginManager;
 
+    /**
+     * Executes the initialization process for StarshipOS.
+     * This includes setting up toolchains, cloning repositories,
+     * building necessary components, and configuring the development environment.
+     *
+     * @throws MojoExecutionException if any initialization step fails
+     */
     @Override
     public void execute() throws MojoExecutionException {
         File projectDir = new File(homeDirectory, LOCKED_PROJECT_NAME);
@@ -59,58 +95,83 @@ public class InitializeMojo extends AbstractMojo {
         try {
             warnAndPrompt();
 
-            getLog().info("*******************************************************");
-            getLog().info("  Installing toolchains for ARM and x86_64");
-            getLog().info("*******************************************************");
+            boolean installToolchainFlag = true;
+            if (installToolchainFlag) {
+                getLog().info("*******************************************************");
+                getLog().info("  Installing toolchains for ARM and x86_64");
+                getLog().info("*******************************************************");
 
-            InstallToolchainUtil toolchainUtil = new InstallToolchainUtil(projectDir);
-            toolchainUtil.installToolchain();
+                InstallToolchainUtil toolchainUtil = new InstallToolchainUtil(projectDir);
+                toolchainUtil.installToolchain();
+            }
 
-            getLog().info("*******************************************************");
-            getLog().info("  Cloning Repositories and Setting up StarshipOS");
-            getLog().info("*******************************************************");
+            boolean installCodebase = true;
+            if (installCodebase) {
+                getLog().info("*******************************************************");
+                getLog().info("  Cloning Repositories and Setting up StarshipOS");
+                getLog().info("*******************************************************");
 
-            InstallHamUtil installHamUtil = new InstallHamUtil(hamRepo, manifestRepo);
-            installHamUtil.cloneRepositoriesAndSetupStarshipOS();
+                InstallHamUtil installHamUtil = new InstallHamUtil(hamRepo, manifestRepo);
+                installHamUtil.cloneRepositoriesAndSetupStarshipOS();
+                DownloadOpenJdkUtil downloadOpenJdkUtil = new DownloadOpenJdkUtil();
+                downloadOpenJdkUtil.cloneOpenJdk("jdk-21-ga");
+            }
 
-            getLog().info("*******************************************************");
-            getLog().info("  Building Fiasco");
-            getLog().info("*******************************************************");
+            boolean buildFiasco = false;
+            if (buildFiasco) {
+                getLog().info("*******************************************************");
+                getLog().info("  Building Fiasco");
+                getLog().info("*******************************************************");
 
-            BuildFiascoUtil buildFiascoUtil = new BuildFiascoUtil(project);
-            buildFiascoUtil.buildFiasco("x86_64");
-            buildFiascoUtil.buildFiasco("arm");
+                BuildFiascoUtil buildFiascoUtil = new BuildFiascoUtil(project);
+                buildFiascoUtil.buildFiasco("x86_64");
+                buildFiascoUtil.buildFiasco("arm");
+            }
+            boolean buildJDK = false;
+            if (buildJDK) {
+                getLog().info("*******************************************************");
+                getLog().info("  Building OpenJDK jdk-21-ga");
+                getLog().info("*******************************************************");
 
-            getLog().info("*******************************************************");
-            getLog().info("  Building L4");
-            getLog().info("*******************************************************");
+                BuildJDKUtil buildJDKUtil = new BuildJDKUtil();
+                boolean x86_64 = true;
+                if (x86_64) {
+                    buildJDKUtil.buildJDK("x86_64");
+                }
+                boolean arm = true;
+                if (arm) {
+                    buildJDKUtil.buildJDK("arm");
+                }
+            }
 
-            BuildL4Util buildL4Util = new BuildL4Util(project);
-            buildL4Util.buildL4("x86_64");
-            buildL4Util.buildL4("arm");
+            boolean buildL4 = false;
+            if (buildL4) {
+                getLog().info("*******************************************************");
+                getLog().info("  Building L4");
+                getLog().info("*******************************************************");
 
-            getLog().info("*******************************************************");
-            getLog().info("  Running Hello World Demo in QEMU (x86_64)");
-            getLog().info("*******************************************************");
+                BuildL4Util buildL4Util = new BuildL4Util(project);
+                boolean x86_64 = true;
+                if (x86_64) {
+                    buildL4Util.buildL4("x86_64");
+                }
+                boolean arm = true;
+                if (arm) {
+                    buildL4Util.buildL4("arm");
+                }
+            }
 
-            RunHelloQemuUtil runHelloQemuUtil = new RunHelloQemuUtil();
-            new RunHelloQemuUtil();
-            runHelloQemuUtil.runHelloDemo("x86_64");
+            boolean runQEMU = false;
+            if (runQEMU) {
+                getLog().info("*******************************************************");
+                getLog().info("  Running Hello World Demo in QEMU (x86_64)");
+                getLog().info("*******************************************************");
+
+                RunHelloQemuUtil runHelloQemuUtil = new RunHelloQemuUtil();
+                new RunHelloQemuUtil();
+                runHelloQemuUtil.runHelloDemo("x86_64");
 // todo            runHelloQemuUtil.runHelloDemo("arm");
-            getLog().info("*******************************************************");
-            getLog().info("  Installing OpenJDK jdk-21-ga");
-            getLog().info("*******************************************************");
-
-            DownloadOpenJdkUtil downloadOpenJdkUtil = new DownloadOpenJdkUtil();
-            downloadOpenJdkUtil.cloneOpenJdk("jdk-21-ga");
-
-            getLog().info("*******************************************************");
-            getLog().info("  Building OpenJDK jdk-21-ga");
-            getLog().info("*******************************************************");
-
-            BuildJDKUtil buildJDKUtil = new BuildJDKUtil();
-            buildJDKUtil.buildJDK("x86_64");
-            buildJDKUtil.buildJDK("arm");
+            }
 
 
             getLog().info("*******************************************************");
@@ -130,6 +191,22 @@ public class InitializeMojo extends AbstractMojo {
             File returnedDir = returnToProjectDirectory(projectDir);
             getLog().info("Returned to project directory: " + returnedDir.getAbsolutePath());
 
+            try {
+                // JavaFX must be started on a separate thread if not already running
+                Thread fxThread = new Thread(() -> {
+                    try {
+                        ModuleSelector.launch(ModuleSelector.class);
+                    } catch (Exception e) {
+                        getLog().error("Failed to launch JavaFX UI: " + e.getMessage());
+                    }
+                });
+                fxThread.setDaemon(false);
+                fxThread.start();
+                fxThread.join();
+            } catch (InterruptedException e) {
+                throw new MojoExecutionException("JavaFX UI thread was interrupted", e);
+            }
+
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 System.out.println("🚀 StarshipOS is ready.");
                 System.out.println("👉 Run the following to switch to your project:");
@@ -141,6 +218,13 @@ public class InitializeMojo extends AbstractMojo {
         }
     }
 
+    /**
+     * Returns to the project directory, creating it if necessary.
+     *
+     * @param projectDir the project directory to return to
+     * @return the project directory File object
+     * @throws IOException if directory creation or access fails
+     */
     private File returnToProjectDirectory(File projectDir) throws IOException {
         if (!projectDir.exists() && !projectDir.mkdirs()) {
             throw new IOException("Failed to access or create project directory: " + projectDir.getAbsolutePath());
@@ -153,6 +237,10 @@ public class InitializeMojo extends AbstractMojo {
         return projectDir;
     }
 
+    /**
+     * Displays warning messages about sudo privileges and prompts for user confirmation.
+     * Provides information about the initialization process and required permissions.
+     */
     public void warnAndPrompt() {
         getLog().warn("===============================================================");
         getLog().warn("        ⚠️  Some Operations May Require Sudo Privileges ⚠️");
@@ -166,19 +254,5 @@ public class InitializeMojo extends AbstractMojo {
         getLog().warn("        Press ENTER to continue or Ctrl+C to abort...");
         getLog().warn("        (Continuing automatically in 5 seconds)");
         getLog().warn("===============================================================");
-
-//        Thread promptThread = new Thread(() -> {
-//            try {
-//                System.in.read(); // Waits for Enter
-//            } catch (IOException ignored) {}
-//        });
-//
-//        promptThread.setDaemon(true);
-//        promptThread.start();
-//
-//        try {
-//            promptThread.join(5000); // wait up to 5 seconds
-//        } catch (InterruptedException ignored) {}
     }
-
 }

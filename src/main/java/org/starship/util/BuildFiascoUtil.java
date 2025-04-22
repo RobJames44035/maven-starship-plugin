@@ -25,14 +25,33 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+
+/**
+ * Utility class for building the Fiasco microkernel and L4Re userland components.
+ * Handles the build process including configuration management and compilation
+ * for different architectures.
+ */
 public class BuildFiascoUtil {
 
     private static final String FIASCO_BASE_DIR = "StarshipOS/fiasco";
     private static final String FIASCO_SRC_DIR = "src";
 
+    /**
+     * Constructs a new BuildFiascoUtil instance.
+     *
+     * @param ignoredProject Maven project instance (currently unused)
+     */
     public BuildFiascoUtil(MavenProject ignoredProject) {
     }
 
+    /**
+     * Builds the Fiasco microkernel for the specified architecture.
+     * This includes compiling the kernel, copying architecture-specific configurations,
+     * and building the L4Re userland components.
+     *
+     * @param architecture target architecture for the build
+     * @throws IllegalStateException if the build process fails
+     */
     public void buildFiasco(String architecture) {
         try {
             File fiascoDir = getAbsolutePath();
@@ -52,6 +71,13 @@ public class BuildFiascoUtil {
         }
     }
 
+    /**
+     * Executes the make command to build the Fiasco kernel.
+     *
+     * @param baseDir      base directory for the build
+     * @param architecture target architecture
+     * @throws Exception if the make command fails
+     */
     private void runMakeCommand(File baseDir, String architecture) throws Exception {
         ProcessBuilder builder = new ProcessBuilder("make", "B=target/" + architecture)
                 .directory(baseDir)
@@ -65,6 +91,13 @@ public class BuildFiascoUtil {
         }
     }
 
+    /**
+     * Copies the prebuilt configuration file for the specified architecture.
+     *
+     * @param objDir target object directory
+     * @param arch   target architecture
+     * @throws IOException if copying the configuration fails
+     */
     private void copyPrebuiltConfig(File objDir, String arch) throws IOException {
         String resourceName = "fiasco.globalconfig." + arch;
         try (InputStream in = getClass().getClassLoader().getResourceAsStream(resourceName)) {
@@ -76,6 +109,12 @@ public class BuildFiascoUtil {
         }
     }
 
+    /**
+     * Runs the olddefconfig make target to update the configuration.
+     *
+     * @param objDir object directory containing the configuration
+     * @throws Exception if the configuration update fails
+     */
     private void runOldConfig(File objDir) throws Exception {
         ProcessBuilder builder = new ProcessBuilder("make", "olddefconfig")
                 .directory(objDir)
@@ -89,6 +128,12 @@ public class BuildFiascoUtil {
         }
     }
 
+    /**
+     * Builds the L4Re userland components using parallel compilation.
+     *
+     * @param objDir object directory for the build
+     * @throws Exception if the userland build fails
+     */
     private void buildL4ReUserland(File objDir) throws Exception {
         ProcessBuilder builder = new ProcessBuilder("make", "-j" + Runtime.getRuntime().availableProcessors())
                 .directory(objDir)
@@ -103,10 +148,22 @@ public class BuildFiascoUtil {
         }
     }
 
+    /**
+     * Gets the absolute path to the Fiasco base directory.
+     *
+     * @return File object representing the Fiasco base directory
+     */
     private File getAbsolutePath() {
         return new File(System.getProperty("user.dir"), BuildFiascoUtil.FIASCO_BASE_DIR);
     }
 
+    /**
+     * Validates that a directory exists and is actually a directory.
+     *
+     * @param dir         directory to validate
+     * @param description descriptive name of the directory for error messages
+     * @throws IOException if the directory is invalid or doesn't exist
+     */
     private void validateDirectory(File dir, String description) throws IOException {
         if (!dir.exists() || !dir.isDirectory()) {
             throw new IOException(description + " directory does not exist or is invalid: " + dir.getAbsolutePath());

@@ -27,18 +27,37 @@ import org.starship.util.BuildFiascoUtil;
 import org.starship.util.BuildJDKUtil;
 import org.starship.util.BuildL4Util;
 
+
+/**
+ * Maven plugin mojo responsible for building different modules of the StarshipOS project.
+ * Supports building Fiasco microkernel, L4 environment, and OpenJDK components.
+ */
 @Mojo(name = "build")
 public class BuildMojo extends AbstractMojo {
 
+    /**
+     * The module to build. Valid values are "fiasco", "l4", or "openjdk".
+     */
     @Parameter(required = true)
     private String module;
 
+    /**
+     * Target architecture for the build. Defaults to "x86_64".
+     */
     @Parameter(defaultValue = "x86_64")
     private String arch;
 
+    /**
+     * The Maven project instance.
+     */
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
 
+    /**
+     * Executes the build process for the specified module and architecture.
+     *
+     * @throws MojoExecutionException if the build process fails or if an unknown module is specified
+     */
     @Override
     public void execute() throws MojoExecutionException {
         getLog().info("[StarshipOS] Executing build for module: " + module + ", architecture: " + arch);

@@ -21,11 +21,24 @@ package org.starship.util;
 import java.io.File;
 import java.io.IOException;
 
+
+/**
+ * Utility class for installing and setting up StarshipOS development environment.
+ * This class handles the cloning of necessary repositories, building the HAM tool,
+ * and performing initial setup operations for StarshipOS development.
+ */
 public class InstallHamUtil {
 
     private final String hamRepoUrl;
     private final String manifestRepoUrl;
 
+    /**
+     * Constructs a new InstallHamUtil with specified repository URLs.
+     *
+     * @param hamRepoUrl      The URL of the HAM tool repository
+     * @param manifestRepoUrl The URL of the manifest repository
+     * @throws IllegalArgumentException if either URL is null or blank
+     */
     public InstallHamUtil(String hamRepoUrl, String manifestRepoUrl) {
         if (hamRepoUrl == null || hamRepoUrl.isBlank()) {
             throw new IllegalArgumentException("HAM repository URL cannot be null or blank.");
@@ -38,6 +51,13 @@ public class InstallHamUtil {
         this.manifestRepoUrl = manifestRepoUrl;
     }
 
+    /**
+     * Performs the complete setup of StarshipOS development environment.
+     * This includes creating directories, cloning repositories, building the HAM tool,
+     * executing necessary HAM commands, and cleaning up temporary files.
+     *
+     * @throws IllegalStateException if any step of the setup process fails
+     */
     public void cloneRepositoriesAndSetupStarshipOS() throws IllegalStateException {
         try {
             File starshipOSDir = createAndNavigateToStarshipOSDirectory();
@@ -55,6 +75,12 @@ public class InstallHamUtil {
         }
     }
 
+    /**
+     * Creates and returns the StarshipOS directory in the current working directory.
+     *
+     * @return File object representing the StarshipOS directory
+     * @throws Exception if directory creation fails
+     */
     private File createAndNavigateToStarshipOSDirectory() throws Exception {
         File currentDir = new File(System.getProperty("user.dir"));
         File starshipOSDir = new File(currentDir, "StarshipOS");
@@ -66,6 +92,14 @@ public class InstallHamUtil {
         return starshipOSDir;
     }
 
+    /**
+     * Clones a Git repository to the specified working directory.
+     *
+     * @param repoUrl          URL of the repository to clone
+     * @param workingDirectory directory where the repository should be cloned
+     * @throws Exception                if the cloning process fails
+     * @throws IllegalArgumentException if repository URL is null or blank
+     */
     private void cloneRepository(String repoUrl, File workingDirectory) throws Exception {
         if (repoUrl == null || repoUrl.isBlank()) {
             throw new IllegalArgumentException("Repository URL cannot be null or blank.");
@@ -82,6 +116,12 @@ public class InstallHamUtil {
         }
     }
 
+    /**
+     * Builds the HAM tool using make command in the specified directory.
+     *
+     * @param hamDir directory containing the HAM tool source code
+     * @throws Exception if the build process fails or directory doesn't exist
+     */
     private void buildHamTool(File hamDir) throws Exception {
         if (!hamDir.exists() || !hamDir.isDirectory()) {
             throw new Exception("'ham' directory does not exist. Cannot build HAM tool.");
@@ -98,6 +138,12 @@ public class InstallHamUtil {
         }
     }
 
+    /**
+     * Executes necessary HAM commands for initial setup.
+     *
+     * @param workingDirectory directory where HAM commands should be executed
+     * @throws Exception if HAM execution fails or executable is not found
+     */
     private void executeHamCommands(File workingDirectory) throws Exception {
         File hamExecutable = new File(workingDirectory, "ham/ham");
 
@@ -109,6 +155,13 @@ public class InstallHamUtil {
         executeShellCommand(workingDirectory, hamExecutable.getAbsolutePath(), "sync");
     }
 
+    /**
+     * Executes a shell command in the specified working directory.
+     *
+     * @param workingDirectory directory where the command should be executed
+     * @param command          variable argument list containing the command and its arguments
+     * @throws Exception if the command execution fails
+     */
     private void executeShellCommand(File workingDirectory, String... command) throws Exception {
         ProcessBuilder builder = new ProcessBuilder(command)
                 .directory(workingDirectory)
@@ -121,6 +174,12 @@ public class InstallHamUtil {
         }
     }
 
+    /**
+     * Verifies that all required directories exist after setup.
+     *
+     * @param starshipOSDir the root StarshipOS directory to check
+     * @throws Exception if any required directory is missing
+     */
     private void verifyRequiredDirectories(File starshipOSDir) throws Exception {
         File fiascoDir = new File(starshipOSDir, "fiasco");
         File l4Dir = new File(starshipOSDir, "l4");
@@ -133,6 +192,12 @@ public class InstallHamUtil {
         }
     }
 
+    /**
+     * Removes temporary directories that are no longer needed after setup.
+     *
+     * @param starshipOSDir the root StarshipOS directory
+     * @throws IOException if directory deletion fails
+     */
     private void cleanupUnnecessaryDirectories(File starshipOSDir) throws IOException {
         File hamDir = new File(starshipOSDir, "ham");
         File hamMetadataDir = new File(starshipOSDir, ".ham");
@@ -141,6 +206,12 @@ public class InstallHamUtil {
         deleteDirectoryRecursively(hamMetadataDir);
     }
 
+    /**
+     * Recursively deletes a directory and all its contents.
+     *
+     * @param dir the directory to delete
+     * @throws IOException if deletion of any file or directory fails
+     */
     private void deleteDirectoryRecursively(File dir) throws IOException {
         if (dir.exists()) {
             File[] files = dir.listFiles();
