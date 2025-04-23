@@ -16,7 +16,10 @@
  *
  */
 
-package org.starship.util;
+package org.starship.util.downloaders;
+
+import org.apache.maven.plugin.AbstractMojo;
+import org.starship.util.AbstractUtil;
 
 import java.io.Console;
 import java.io.File;
@@ -32,17 +35,10 @@ import java.util.Locale;
  * across different Linux distributions. Supports Debian, Fedora, RedHat and Arch
  * based systems.
  */
-public class InstallToolchainUtil {
+public class InstallToolchainUtil extends AbstractUtil {
 
-    private final File projectDir;
-
-    /**
-     * Creates a new instance of InstallToolchainUtil.
-     *
-     * @param projectDir The root directory of the project where commands will be executed
-     */
-    public InstallToolchainUtil(File projectDir) {
-        this.projectDir = projectDir;
+    public InstallToolchainUtil(AbstractMojo mojo) {
+        super(mojo);
     }
 
     /**
@@ -173,7 +169,7 @@ public class InstallToolchainUtil {
      */
     private void executeCommand(String command) throws IOException, InterruptedException {
         ProcessBuilder builder = new ProcessBuilder("bash", "-c", command);
-        builder.directory(projectDir);
+//        builder.directory(mojo);
         builder.inheritIO();
         Process process = builder.start();
 

@@ -16,7 +16,10 @@
  *
  */
 
-package org.starship.util;
+package org.starship.util.downloaders;
+
+import org.apache.maven.plugin.AbstractMojo;
+import org.starship.util.AbstractUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,28 +30,14 @@ import java.io.IOException;
  * This class handles the cloning of necessary repositories, building the HAM tool,
  * and performing initial setup operations for StarshipOS development.
  */
-public class InstallHamUtil {
+public class InstallHamUtil extends AbstractUtil {
 
-    private final String hamRepoUrl;
-    private final String manifestRepoUrl;
+    private static final String hamRepoUrl = "https://github.com/kernkonzept/ham.git";
+    private static final String manifestRepoUrl = "https://github.com/kernkonzept/manifest.git";
 
-    /**
-     * Constructs a new InstallHamUtil with specified repository URLs.
-     *
-     * @param hamRepoUrl      The URL of the HAM tool repository
-     * @param manifestRepoUrl The URL of the manifest repository
-     * @throws IllegalArgumentException if either URL is null or blank
-     */
-    public InstallHamUtil(String hamRepoUrl, String manifestRepoUrl) {
-        if (hamRepoUrl == null || hamRepoUrl.isBlank()) {
-            throw new IllegalArgumentException("HAM repository URL cannot be null or blank.");
-        }
-        if (manifestRepoUrl == null || manifestRepoUrl.isBlank()) {
-            throw new IllegalArgumentException("Manifest repository URL cannot be null or blank.");
-        }
 
-        this.hamRepoUrl = hamRepoUrl;
-        this.manifestRepoUrl = manifestRepoUrl;
+    public InstallHamUtil(AbstractMojo mojo) {
+        super(mojo);
     }
 
     /**

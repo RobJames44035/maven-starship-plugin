@@ -17,7 +17,7 @@
  */
 
 // KeypairUtils.java
-package org.starship.util;
+package org.starship.util.misc;
 
 import org.apache.maven.plugin.MojoExecutionException;
 

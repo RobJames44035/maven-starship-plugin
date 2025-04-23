@@ -4,6 +4,7 @@
       <w>gitkeep</w>
       <w>gitmodules</w>
       <w>globalconfig</w>
+      <w>gmavenplus</w>
       <w>gnueabihf</w>
       <w>helpmojo</w>
       <w>iommu</w>
@@ -17,6 +18,8 @@
       <w>libxrender</w>
       <w>libxt</w>
       <w>libxtst</w>
+      <w>mavenize</w>
+      <w>mkdirs</w>
       <w>noconfirm</w>
       <w>oldconfig</w>
       <w>olddefconfig</w>

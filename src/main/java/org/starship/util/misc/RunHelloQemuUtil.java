@@ -16,7 +16,7 @@
  *
  */
 
-package org.starship.util;
+package org.starship.util.misc;
 
 import java.io.File;
 

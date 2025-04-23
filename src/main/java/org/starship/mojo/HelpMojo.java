@@ -16,21 +16,23 @@
  *
  */
 
-package org.starship;
+package org.starship.mojo;
 
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.starship.util.KeypairUtils;
 
-@Mojo(name = "gen-keypair")
-public class GenKeypairMojo extends AbstractMojo {
-
-    public void execute() throws MojoExecutionException {
-        try {
-            KeypairUtils.createKeystore();
-        } catch (Exception e) {
-            throw new MojoExecutionException("Failed to generate keypair", e);
-        }
+/**
+ * Displays help information for the Starship Maven Plugin.
+ */
+@Mojo(name = "help", requiresProject = false)
+public class HelpMojo extends AbstractMojo {
+    public void execute() {
+        getLog().info("StarshipOS Plugin Help:");
+        getLog().info("  mvn starship:initialize    - Bootstrap StarshipOS project structure");
+        getLog().info("  mvn starship:add-module    - Add a new module to the project");
+        getLog().info("  mvn starship:build         - Build a specific StarshipOS component");
+        getLog().info("  mvn help:describe          - View plugin details (built-in)");
+        getLog().info("");
+        getLog().info("  Tip: Use -Darch=arm or -Darch=x86_64 for cross-arch support.");
     }
 }

@@ -16,7 +16,7 @@
  *
  */
 
-package org.starship.util;
+package org.starship.util.mavenizers;
 
 import org.apache.maven.plugin.logging.Log;
 

@@ -16,7 +16,10 @@
  *
  */
 
-package org.starship.util;
+package org.starship.util.downloaders;
+
+import org.apache.maven.plugin.AbstractMojo;
+import org.starship.util.AbstractUtil;
 
 import java.io.File;
 
@@ -25,9 +28,13 @@ import java.io.File;
  * Utility class for downloading and cloning OpenJDK source code from the official repository.
  * This class provides functionality to clone specific versions or the latest version of OpenJDK.
  */
-public class DownloadOpenJdkUtil {
+public class DownloadOpenJdkUtil extends AbstractUtil {
 
     private static final String GIT_URL = "https://github.com/openjdk/jdk.git";
+
+    public DownloadOpenJdkUtil(AbstractMojo mojo) {
+        super(mojo);
+    }
 
     /**
      * Clones the OpenJDK repository to a local directory. If a tag is specified, performs a shallow clone

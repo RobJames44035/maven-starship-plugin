@@ -16,7 +16,7 @@
  *
  */
 
-package org.starship.util;
+package org.starship.util.builders;
 
 import org.codehaus.plexus.util.FileUtils;
 

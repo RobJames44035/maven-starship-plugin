@@ -25,31 +25,25 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.apache.maven.plugin.AbstractMojo;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 @SuppressWarnings("ALL")
 public class ModuleSelector extends Application {
 
     private final File pomFile = new File("pom.xml");
-    private final File propertiesFile = new File("starship-dev.properties");
-
-    private final Map<String, String> defaultInstallConfig = new HashMap<>() {{
-        put("installToolchainFlag", "true");
-        put("installCodebase", "true");
-        put("buildFiasco", "false");
-        put("buildL4", "false");
-        put("runQEMU", "false");
-        put("buildJDK", "false");
-    }};
+    private final File propertiesFile = new File(".starship/starship-dev.properties");
 
     private final PomModuleSelectorHandler pomModuleHandler = new PomModuleSelectorHandler(pomFile);
-    private final InstallConfigHandler installConfigHandler = new InstallConfigHandler(propertiesFile, defaultInstallConfig);
+    private final PropertiesSelectorHandler propertiesHandler = new PropertiesSelectorHandler(propertiesFile);
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public static void setMojo(AbstractMojo mojo) {
+        // future mojo injection if needed
     }
 
     @Override
@@ -89,8 +83,8 @@ public class ModuleSelector extends Application {
         VBox rightContent = new VBox(10);
 
         try {
-            installConfigHandler.initialize();
-            rightContent.getChildren().addAll(installConfigHandler.getUI().getChildren());
+            propertiesHandler.initialize();
+            rightContent.getChildren().addAll(propertiesHandler.getUI().getChildren());
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Error initializing Configuration Properties: " + e.getMessage());
@@ -105,7 +99,7 @@ public class ModuleSelector extends Application {
         contentHBox.getChildren().addAll(leftPanel, rightPanel);
         contentHBox.setStyle("-fx-padding: 10;");
 
-        HBox buttonRow = new ButtonRow(pomModuleHandler, installConfigHandler, primaryStage);
+        HBox buttonRow = new ButtonRow(pomModuleHandler, propertiesHandler, primaryStage);
 
         mainVBox.getChildren().addAll(contentHBox, buttonRow);
 
