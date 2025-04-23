@@ -20,134 +20,44 @@ package org.starship;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.starship.util.ModuleScaffolder;
+import org.starship.util.PomUtils;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.File;
-import java.io.FileWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
-
-/**
- * Maven plugin that creates a new module within a multi-module Maven project.
- * This Mojo creates the module directory structure, generates a basic pom.xml file,
- * and updates the parent pom.xml to include the new module.
- */
-@Mojo(name = "add-module")
+@Mojo(name = "add-module", defaultPhase = LifecyclePhase.NONE)
 public class AddModuleMojo extends AbstractMojo {
 
-    /**
-     * The name of the module to be created. This parameter is required and will be used
-     * as both the directory name and the artifactId in the generated pom.xml.
-     */
-    @Parameter(property = "module", required = true)
-    private String module;
+    @Parameter(property = "name", required = true)
+    private String moduleName;
 
-    /**
-     * Executes the plugin goal to create a new module.
-     * Creates the module directory structure, generates a pom.xml file with basic configuration,
-     * and updates the parent pom.xml to include the new module.
-     *
-     * @throws MojoExecutionException if any error occurs during module creation
-     */
-    @Override
+    @Parameter(property = "bundle", defaultValue = "false")
+    private boolean isBundle;
+
+    @Parameter(defaultValue = "${project.basedir}", readonly = true)
+    private File baseDir;
+
     public void execute() throws MojoExecutionException {
         try {
-            File baseDir = new File(System.getProperty("user.dir"));
-            File moduleDir = new File(baseDir, module);
-
-            if (!moduleDir.exists() && !moduleDir.mkdirs()) {
-                throw new MojoExecutionException("Failed to create module directory: " + moduleDir);
+            File moduleDir = new File(baseDir, moduleName);
+            if (!moduleDir.exists()) {
+                getLog().info("Creating module directory: " + moduleDir);
+                moduleDir.mkdirs();
             }
 
-            String[] paths = {
-                    "src/main/java", "src/main/groovy",
-                    "src/test/java", "src/test/groovy"
-            };
-            for (String p : paths) {
-                Files.createDirectories(Paths.get(moduleDir.getAbsolutePath(), p));
-            }
+            File rootPom = new File(baseDir, "pom.xml");
+            PomUtils.insertModuleEntry(rootPom, moduleName, getLog());
 
-            File pomFile = new File(moduleDir, "pom.xml");
-            try (FileWriter writer = new FileWriter(pomFile)) {
-                writer.write(
-                        "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
-                                "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                                "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
-                                "    <modelVersion>4.0.0</modelVersion>\n" +
-                                "    <parent>\n" +
-                                "        <groupId>org.starshipos</groupId>\n" +
-                                "        <artifactId>starship-parent</artifactId>\n" +
-                                "        <version>1.0.0</version>\n" +
-                                "    </parent>\n" +
-                                "    <artifactId>" + module + "</artifactId>\n" +
-                                "    <version>1.0.0</version>\n" +
-                                "    <properties>\n" +
-                                "        <groovy.version>4.0.18</groovy.version>\n" +
-                                "    </properties>\n" +
-                                "    <dependencies>\n" +
-                                "        <dependency>\n" +
-                                "            <groupId>org.apache.groovy</groupId>\n" +
-                                "            <artifactId>groovy-all</artifactId>\n" +
-                                "            <version>${groovy.version}</version>\n" +
-                                "            <type>pom</type>\n" +
-                                "        </dependency>\n" +
-                                "    </dependencies>\n" +
-                                "</project>\n"
-                );
-            }
+            ModuleScaffolder scaffold = new ModuleScaffolder(getLog());
+            scaffold.createStandardStructure(moduleDir);
+            scaffold.writePomFile(moduleDir, moduleName, isBundle);
 
-            File parentPom = new File(baseDir, "pom.xml");
-            if (!parentPom.exists()) {
-                throw new MojoExecutionException("Parent POM not found: " + parentPom);
-            }
-
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(parentPom);
-            doc.getDocumentElement().normalize();
-
-            NodeList modulesList = doc.getElementsByTagName("modules");
-            Element modulesElement;
-            if (modulesList.getLength() == 0) {
-                modulesElement = doc.createElement("modules");
-                doc.getDocumentElement().appendChild(modulesElement);
-            } else {
-                modulesElement = (Element) modulesList.item(0);
-            }
-
-            boolean alreadyExists = false;
-            NodeList existingModules = modulesElement.getElementsByTagName("module");
-            for (int i = 0; i < existingModules.getLength(); i++) {
-                if (existingModules.item(i).getTextContent().equals(module)) {
-                    alreadyExists = true;
-                    break;
-                }
-            }
-
-            if (!alreadyExists) {
-                Element newModule = doc.createElement("module");
-                newModule.setTextContent(module);
-                modulesElement.appendChild(newModule);
-
-                Transformer transformer = TransformerFactory.newInstance().newTransformer();
-                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-                transformer.transform(new DOMSource(doc), new StreamResult(parentPom));
-            }
-
+            getLog().info("Module '" + moduleName + "' added successfully.");
         } catch (Exception e) {
-            throw new MojoExecutionException("Failed to add module: " + module, e);
+            throw new MojoExecutionException("Failed to add module: " + moduleName, e);
         }
     }
 }

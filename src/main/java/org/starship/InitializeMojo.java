@@ -26,221 +26,154 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.starship.ui.ModuleSelector;
 import org.starship.util.*;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.util.Properties;
 
-
-/**
- * Maven Mojo responsible for initializing the StarshipOS development environment.
- * This plugin handles the complete setup process including:
- * - Installing required toolchains for ARM and x86_64
- * - Cloning necessary repositories
- * - Building Fiasco and L4 kernels
- * - Setting up OpenJDK
- * - Creating Maven project structure
- */
-@SuppressWarnings({"unused", "ConstantValue"})
+@SuppressWarnings("unused")
 @Mojo(name = "initialize", requiresProject = false)
 public class InitializeMojo extends AbstractMojo {
-    /**
-     * Base directory for the StarshipOS project
-     */
-    private static final File baseDir = new File(System.getProperty("user.dir"), "StarshipOS");
-    /**
-     * Fixed project name
-     */
-    private static final String LOCKED_PROJECT_NAME = "StarshipOS";
-    /**
-     * User's home directory
-     */
-    @Parameter(defaultValue = "${user.home}", readonly = true)
-    private File homeDirectory;
-    /**
-     * Current Maven project
-     */
-    @Parameter(defaultValue = "${project}", readonly = true, required = true)
-    private MavenProject project;
-    /**
-     * Current Maven session
-     */
-    @Parameter(defaultValue = "${session}", readonly = true, required = true)
-    private MavenSession session;
-    /**
-     * Plugin manager for build operations
-     */
+
+    private static final File baseDir = new File(System.getProperty("user.dir"));
+    private static final String hamRepo = "https://github.com/kernkonzept/ham.git";
+    private static final String manifestRepo = "https://github.com/kernkonzept/manifest.git";
+
     @Component
     private BuildPluginManager pluginManager;
+    @Parameter(defaultValue = "${project}", readonly = true, required = false)
+    private MavenProject project;
+    @Parameter(defaultValue = "${session}", readonly = true, required = false)
+    private MavenSession session;
+    private boolean installToolchainFlag;
+    private boolean installCodebase;
+    private boolean buildFiasco;
+    private boolean buildFiasco_ARM;
+    private boolean buildFiasco_x86_64;
+    private boolean buildL4;
+    private boolean buildL4_ARM;
+    private boolean buildL4_x86_64;
+    private boolean buildJDK;
+    private boolean buildJDK_ARM;
+    private boolean buildJDK_x86_64;
+    private boolean runQEMU;
+    private boolean runQEMU_ARM;
+    private boolean runQEMU_x86_64;
 
-    /**
-     * Executes the initialization process for StarshipOS.
-     * This includes setting up toolchains, cloning repositories,
-     * building necessary components, and configuring the development environment.
-     *
-     * @throws MojoExecutionException if any initialization step fails
-     */
     @Override
     public void execute() throws MojoExecutionException {
-        File projectDir = new File(homeDirectory, LOCKED_PROJECT_NAME);
-
+        File projectDir = baseDir;
+        System.out.println("Current directory: " + projectDir.getAbsolutePath());
+        System.out.println("Current baseDir: " + baseDir);
         if (!projectDir.exists() && !projectDir.mkdirs()) {
             throw new MojoExecutionException("Failed to create project directory: " + projectDir.getAbsolutePath());
         }
 
-        String hamRepo = "https://github.com/kernkonzept/ham.git";
-        String manifestRepo = "https://github.com/kernkonzept/manifest.git";
-
         try {
-            warnAndPrompt();
+            processPropertiesFile();
 
-            boolean installToolchainFlag = true;
             if (installToolchainFlag) {
                 getLog().info("*******************************************************");
                 getLog().info("  Installing toolchains for ARM and x86_64");
                 getLog().info("*******************************************************");
-
-                InstallToolchainUtil toolchainUtil = new InstallToolchainUtil(projectDir);
-                toolchainUtil.installToolchain();
+                new InstallToolchainUtil(projectDir).installToolchain();
             }
 
-            boolean installCodebase = true;
             if (installCodebase) {
                 getLog().info("*******************************************************");
                 getLog().info("  Cloning Repositories and Setting up StarshipOS");
                 getLog().info("*******************************************************");
-
-                InstallHamUtil installHamUtil = new InstallHamUtil(hamRepo, manifestRepo);
-                installHamUtil.cloneRepositoriesAndSetupStarshipOS();
-                DownloadOpenJdkUtil downloadOpenJdkUtil = new DownloadOpenJdkUtil();
-                downloadOpenJdkUtil.cloneOpenJdk("jdk-21-ga");
+                new InstallHamUtil(hamRepo, manifestRepo).cloneRepositoriesAndSetupStarshipOS();
+                new DownloadOpenJdkUtil().cloneOpenJdk("jdk-21-ga");
             }
 
-            boolean buildFiasco = false;
             if (buildFiasco) {
                 getLog().info("*******************************************************");
                 getLog().info("  Building Fiasco");
                 getLog().info("*******************************************************");
-
-                BuildFiascoUtil buildFiascoUtil = new BuildFiascoUtil(project);
-                buildFiascoUtil.buildFiasco("x86_64");
-                buildFiascoUtil.buildFiasco("arm");
-            }
-            boolean buildJDK = false;
-            if (buildJDK) {
-                getLog().info("*******************************************************");
-                getLog().info("  Building OpenJDK jdk-21-ga");
-                getLog().info("*******************************************************");
-
-                BuildJDKUtil buildJDKUtil = new BuildJDKUtil();
-                boolean x86_64 = true;
-                if (x86_64) {
-                    buildJDKUtil.buildJDK("x86_64");
-                }
-                boolean arm = true;
-                if (arm) {
-                    buildJDKUtil.buildJDK("arm");
-                }
+                BuildFiascoUtil util = new BuildFiascoUtil();
+                if (buildFiasco_x86_64) util.buildFiasco("x86_64");
+                if (buildFiasco_ARM) util.buildFiasco("arm");
             }
 
-            boolean buildL4 = false;
             if (buildL4) {
                 getLog().info("*******************************************************");
                 getLog().info("  Building L4");
                 getLog().info("*******************************************************");
-
-                BuildL4Util buildL4Util = new BuildL4Util(project);
-                boolean x86_64 = true;
-                if (x86_64) {
-                    buildL4Util.buildL4("x86_64");
-                }
-                boolean arm = true;
-                if (arm) {
-                    buildL4Util.buildL4("arm");
-                }
+                BuildL4Util util = new BuildL4Util();
+                if (buildL4_x86_64) util.buildL4("x86_64");
+                if (buildL4_ARM) util.buildL4("arm");
             }
 
-            boolean runQEMU = false;
+            if (buildJDK) {
+                getLog().info("*******************************************************");
+                getLog().info("  Building OpenJDK jdk-21-ga");
+                getLog().info("*******************************************************");
+                BuildJDKUtil util = new BuildJDKUtil();
+                if (buildJDK_x86_64) util.buildJDK("x86_64");
+                if (buildJDK_ARM) util.buildJDK("arm");
+            }
+
             if (runQEMU) {
                 getLog().info("*******************************************************");
-                getLog().info("  Running Hello World Demo in QEMU (x86_64)");
+                getLog().info("  Running Hello World Demo in QEMU");
                 getLog().info("*******************************************************");
-
-                RunHelloQemuUtil runHelloQemuUtil = new RunHelloQemuUtil();
-                new RunHelloQemuUtil();
-                runHelloQemuUtil.runHelloDemo("x86_64");
-// todo            runHelloQemuUtil.runHelloDemo("arm");
+                RunHelloQemuUtil util = new RunHelloQemuUtil();
+                if (runQEMU_x86_64) util.runHelloDemo("x86_64");
+                if (runQEMU_ARM) util.runHelloDemo("arm");
             }
-
 
             getLog().info("*******************************************************");
             getLog().info("  Creating Apache Maven project: StarshipOS");
             getLog().info("*******************************************************");
-
-            MavenizeUtil mavenizeUtil = new MavenizeUtil();
-            mavenizeUtil.generateModulePoms(baseDir);
+            new MavenizeUtil().generateModulePoms(baseDir);
 
             getLog().info("*******************************************************");
-            getLog().info("  Cleanup.  Almost done");
+            getLog().info("  Cleanup. Almost done");
             getLog().info("*******************************************************");
-
-            CleanupUtil cleanupUtil = new CleanupUtil();
-            cleanupUtil.scrubAndInit();
-
-            File returnedDir = returnToProjectDirectory(projectDir);
-            getLog().info("Returned to project directory: " + returnedDir.getAbsolutePath());
-
-            try {
-                // JavaFX must be started on a separate thread if not already running
-                Thread fxThread = new Thread(() -> {
-                    try {
-                        ModuleSelector.launch(ModuleSelector.class);
-                    } catch (Exception e) {
-                        getLog().error("Failed to launch JavaFX UI: " + e.getMessage());
-                    }
-                });
-                fxThread.setDaemon(false);
-                fxThread.start();
-                fxThread.join();
-            } catch (InterruptedException e) {
-                throw new MojoExecutionException("JavaFX UI thread was interrupted", e);
-            }
-
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                System.out.println("🚀 StarshipOS is ready.");
-                System.out.println("👉 Run the following to switch to your project:");
-                System.out.println("   cd ./StarshipOS");
-            }));
+            new CleanupUtil().scrubAndInit();
 
         } catch (Exception e) {
             throw new MojoExecutionException("Failed to initialize StarshipOS: " + e.getMessage(), e);
         }
     }
 
-    /**
-     * Returns to the project directory, creating it if necessary.
-     *
-     * @param projectDir the project directory to return to
-     * @return the project directory File object
-     * @throws IOException if directory creation or access fails
-     */
-    private File returnToProjectDirectory(File projectDir) throws IOException {
-        if (!projectDir.exists() && !projectDir.mkdirs()) {
-            throw new IOException("Failed to access or create project directory: " + projectDir.getAbsolutePath());
+    public void processPropertiesFile() throws IOException {
+        File targetDirectory = new File(System.getProperty("user.dir"), "StarshipOS/.starship");
+
+        Properties properties = new Properties();
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("starship-dev.properties")) {
+            if (inputStream == null) {
+                throw new FileNotFoundException("Resource 'starship-dev.properties' not found.");
+            }
+            properties.load(inputStream);
         }
 
-        if (!projectDir.setWritable(true)) {
-            getLog().warn("Could not set project directory writable: " + projectDir.getAbsolutePath());
+        installToolchainFlag = Boolean.parseBoolean(properties.getProperty("installToolchainFlag", "false"));
+        installCodebase = Boolean.parseBoolean(properties.getProperty("installCodebase", "false"));
+        buildFiasco = Boolean.parseBoolean(properties.getProperty("buildFiasco", "false"));
+        buildFiasco_ARM = Boolean.parseBoolean(properties.getProperty("buildFiasco.ARM", "false"));
+        buildFiasco_x86_64 = Boolean.parseBoolean(properties.getProperty("buildFiasco.x86_64", "false"));
+        buildL4 = Boolean.parseBoolean(properties.getProperty("buildL4", "false"));
+        buildL4_ARM = Boolean.parseBoolean(properties.getProperty("buildL4.ARM", "false"));
+        buildL4_x86_64 = Boolean.parseBoolean(properties.getProperty("buildL4.x86_64", "false"));
+        buildJDK = Boolean.parseBoolean(properties.getProperty("buildJDK", "false"));
+        buildJDK_ARM = Boolean.parseBoolean(properties.getProperty("buildJDK.ARM", "false"));
+        buildJDK_x86_64 = Boolean.parseBoolean(properties.getProperty("buildJDK.x86_64", "false"));
+        runQEMU = Boolean.parseBoolean(properties.getProperty("runQEMU", "false"));
+        runQEMU_ARM = Boolean.parseBoolean(properties.getProperty("runQEMU.ARM", "false"));
+        runQEMU_x86_64 = Boolean.parseBoolean(properties.getProperty("runQEMU.x86_64", "false"));
+
+        if (!targetDirectory.exists() && !targetDirectory.mkdirs()) {
+            throw new IOException("Failed to create directory: " + targetDirectory.getAbsolutePath());
         }
 
-        return projectDir;
+        File propertiesFile = new File(targetDirectory, "starship-dev.properties");
+        try (FileWriter writer = new FileWriter(propertiesFile)) {
+            properties.store(writer, "Starship Development Updated Properties");
+        }
     }
 
-    /**
-     * Displays warning messages about sudo privileges and prompts for user confirmation.
-     * Provides information about the initialization process and required permissions.
-     */
     public void warnAndPrompt() {
         getLog().warn("===============================================================");
         getLog().warn("        ⚠️  Some Operations May Require Sudo Privileges ⚠️");
@@ -254,5 +187,17 @@ public class InitializeMojo extends AbstractMojo {
         getLog().warn("        Press ENTER to continue or Ctrl+C to abort...");
         getLog().warn("        (Continuing automatically in 5 seconds)");
         getLog().warn("===============================================================");
+    }
+
+    private File returnToProjectDirectory(File projectDir) throws IOException {
+        if (!projectDir.exists() && !projectDir.mkdirs()) {
+            throw new IOException("Failed to access or create project directory: " + projectDir.getAbsolutePath());
+        }
+
+        if (!projectDir.setWritable(true)) {
+            getLog().warn("Could not set project directory writable: " + projectDir.getAbsolutePath());
+        }
+
+        return projectDir;
     }
 }

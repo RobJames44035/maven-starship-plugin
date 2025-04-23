@@ -16,6 +16,21 @@
  *
  */
 
-File touchFile = new File( basedir, "target/touch.txt" )
+package org.starship;
 
-assert touchFile.isFile()
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.starship.util.KeypairUtils;
+
+@Mojo(name = "gen-keypair")
+public class GenKeypairMojo extends AbstractMojo {
+
+    public void execute() throws MojoExecutionException {
+        try {
+            KeypairUtils.createKeystore();
+        } catch (Exception e) {
+            throw new MojoExecutionException("Failed to generate keypair", e);
+        }
+    }
+}

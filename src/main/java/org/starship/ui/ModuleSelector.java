@@ -22,8 +22,8 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.image.Image;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -56,23 +56,6 @@ public class ModuleSelector extends Application {
     public void start(Stage primaryStage) {
         VBox mainVBox = new VBox(10);
         mainVBox.setStyle("-fx-padding: 10;");
-
-        try {
-            // Set Background Image from resources folder
-            // Ensure that your resource image is placed in the `resources` folder (e.g., `src/main/resources/background.png`)
-            // Size: 1920x1080
-            Image backgroundImage = new Image(getClass().getResourceAsStream("background.png"), 1920, 1080, false, true);
-            BackgroundImage background = new BackgroundImage(
-                    backgroundImage,
-                    BackgroundRepeat.NO_REPEAT,
-                    BackgroundRepeat.NO_REPEAT,
-                    BackgroundPosition.CENTER,
-                    BackgroundSize.DEFAULT
-            );
-            mainVBox.setBackground(new Background(background));
-        } catch (Exception e) {
-            System.err.println("Error loading background image. Ensure the image exists at '/background.png': " + e.getMessage());
-        }
 
         VBox leftPanel = new VBox(10);
         leftPanel.setStyle("-fx-padding: 10; -fx-border-color: #dcdcdc; -fx-border-width: 1; -fx-border-radius: 5; -fx-background-color: rgba(255, 255, 255, 0.8);");

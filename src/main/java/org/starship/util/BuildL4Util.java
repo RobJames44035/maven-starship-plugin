@@ -18,7 +18,6 @@
 
 package org.starship.util;
 
-import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
@@ -40,7 +39,7 @@ public class BuildL4Util {
      *
      * @param ignoredProject Maven project instance (currently not used)
      */
-    public BuildL4Util(MavenProject ignoredProject) {
+    public BuildL4Util(/*MavenProject ignoredProject*/) {
     }
 
     /**

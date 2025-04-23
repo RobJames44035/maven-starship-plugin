@@ -16,13 +16,13 @@
  *
  */
 
+// MavenizeUtil.java
 package org.starship.util;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
-
 
 /**
  * Utility class for generating Maven POM files for StarshipOS modules.
@@ -104,6 +104,14 @@ public class MavenizeUtil {
                     "    <module>l4</module>\n" +
                     "    <module>openjdk</module>\n" +
                     "  </modules>\n" +
+                    "\n" +
+                    "  <dependencies>\n" +
+                    "    <dependency>\n" +
+                    "      <groupId>org.starshipos</groupId>\n" +
+                    "      <artifactId>starship-maven-plugin</artifactId>\n" +
+                    "      <version>1.0.0-SNAPSHOT</version>\n" +
+                    "    </dependency>" +
+                    "  </dependencies>\n\n" +
                     "</project>\n");
         }
     }

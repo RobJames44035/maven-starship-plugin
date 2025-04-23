@@ -18,7 +18,6 @@
 
 package org.starship.util;
 
-import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
@@ -41,7 +40,7 @@ public class BuildFiascoUtil {
      *
      * @param ignoredProject Maven project instance (currently unused)
      */
-    public BuildFiascoUtil(MavenProject ignoredProject) {
+    public BuildFiascoUtil(/*MavenProject ignoredProject*/) {
     }
 
     /**
