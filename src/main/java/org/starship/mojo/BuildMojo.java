@@ -28,7 +28,7 @@ import org.starship.util.builders.BuildL4Util;
 public class BuildMojo extends AbstractStarshipMojo {
 
     @Override
-    protected void doExecute() {
+    public void doExecute() {
         System.out.println("BuildMojo.doExecute");
         try {
             if (buildFiasco) {
