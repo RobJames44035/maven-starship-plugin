@@ -16,7 +16,7 @@
  *
  */
 
-package org.starship.ui;
+package org.starshipos.ui;
 
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.HBox;

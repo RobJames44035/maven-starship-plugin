@@ -16,7 +16,7 @@
  *
  */
 
-package org.starship.ui;
+package org.starshipos.ui;
 
 import javafx.scene.layout.VBox;
 

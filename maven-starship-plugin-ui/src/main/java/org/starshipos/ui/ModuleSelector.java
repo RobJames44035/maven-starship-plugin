@@ -16,7 +16,7 @@
  *
  */
 
-package org.starship.ui;
+package org.starshipos.ui;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -25,7 +25,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.apache.maven.plugin.AbstractMojo;
 
 import java.io.File;
 
@@ -40,10 +39,6 @@ public class ModuleSelector extends Application {
 
     public static void main(String[] args) {
         launch(args);
-    }
-
-    public static void setMojo(AbstractMojo mojo) {
-        // future mojo injection if needed
     }
 
     @Override

@@ -47,6 +47,7 @@
           <option value="maven-starship-plugin" />
           <option value="maven-starship-plugin" />
           <option value="maven-starship-plugin" />
+          <option value="maven-starship-plugin-plugin" />
         </list>
       </option>
       <option name="ignoredPackages">
@@ -57,10 +58,12 @@
           <option value="commons-io:commons-io:2.6" />
           <option value="org.apache.commons:commons-compress:1.16.1" />
           <option value="org.iq80.snappy:snappy:0.4" />
+          <option value="com.google.guava:guava:30.1-jre" />
         </list>
       </option>
       <option name="ignoredReasons">
         <list>
+          <option value="Not exploitable" />
           <option value="Not exploitable" />
           <option value="Not exploitable" />
           <option value="Not exploitable" />
